@@ -1,5 +1,3 @@
-"use client";
-
 import { useState, useEffect, useCallback } from "react";
 
 // ============================================================
@@ -1055,7 +1053,95 @@ function Estimator({ config, onSaveEstimate, onBack }) {
 
                 <div style={{ display: "flex", gap: "1rem", marginTop: "1.5rem", flexWrap: "wrap" }}>
                   <button className="btn btn-primary" onClick={handleSave}>💾 Guardar Estimado</button>
-                  <button className="btn btn-orange" onClick={() => alert("Función PDF — integre librería jsPDF o similar.")}>
+                  <button className="btn btn-orange" onClick={async () => {
+                    const { default: jsPDF } = await import("jspdf");
+                    const doc = new jsPDF();
+                    // Header
+                    doc.setFillColor(17, 20, 24);
+                    doc.rect(0, 0, 210, 40, "F");
+                    doc.setTextColor(255, 255, 255);
+                    doc.setFontSize(22);
+                    doc.text("INSTA BUILDINGS LLC", 20, 18);
+                    doc.setFontSize(10);
+                    doc.setTextColor(143, 160, 181);
+                    doc.text("Metal Building Installation Cost Estimator", 20, 28);
+                    doc.text(`Fecha: ${new Date().toLocaleDateString("es-MX")}`, 20, 36);
+                    // Client info
+                    doc.setTextColor(30, 30, 30);
+                    doc.setFontSize(13);
+                    doc.text("INFORMACIÓN DEL PROYECTO", 20, 55);
+                    doc.setLineWidth(0.5);
+                    doc.setDrawColor(61, 127, 193);
+                    doc.line(20, 58, 190, 58);
+                    doc.setFontSize(10);
+                    doc.setTextColor(60, 60, 60);
+                    const info = [
+                      [`Proyecto:`, project.projectName || "Sin nombre"],
+                      [`Cliente:`, project.customerName || "—"],
+                      [`Email:`, project.email || "—"],
+                      [`Teléfono:`, project.phone || "—"],
+                      [`Tipo:`, project.projectType],
+                      [`Estado:`, STATE_RATES[project.state]?.name || "—"],
+                      [`Ciudad:`, project.city || "—"],
+                      [`Superficie:`, `${project.sqft || 0} SqFt`],
+                      [`Altura:`, `${project.height || 0} ft`],
+                      [`Instalación:`, project.includeInstallation ? "Sí" : "No"],
+                      [`Material:`, project.includeMaterial ? "Sí" : "No"],
+                      [`Planos:`, project.drawingsAvailable ? "Disponibles" : "No disponibles"],
+                    ];
+                    info.forEach(([label, val], i) => {
+                      const y = 68 + i * 8;
+                      doc.setFont(undefined, "bold");
+                      doc.text(label, 20, y);
+                      doc.setFont(undefined, "normal");
+                      doc.text(val, 70, y);
+                    });
+                    // Cost breakdown
+                    doc.setFontSize(13);
+                    doc.setTextColor(30, 30, 30);
+                    doc.text("DESGLOSE DE COSTOS", 20, 172);
+                    doc.setDrawColor(61, 127, 193);
+                    doc.line(20, 175, 190, 175);
+                    doc.setFontSize(10);
+                    const costs = [
+                      ["Costo Base (SqFt × Tarifa)", fmt(result.baseCost)],
+                      ["Elementos Adicionales", fmt(result.additionalsCost)],
+                      ["Movilización", fmt(result.mobilization)],
+                      [`Factor Complejidad (×${complexityFactor})`, fmt(result.subtotal - (result.baseCost + result.additionalsCost + result.mobilization))],
+                      [`Margen de Utilidad (${config.profitMargin}%)`, fmt(result.withMargin - result.subtotal)],
+                    ];
+                    costs.forEach(([label, val], i) => {
+                      const y = 185 + i * 9;
+                      doc.setTextColor(60, 60, 60);
+                      doc.text(label, 20, y);
+                      doc.setTextColor(30, 30, 30);
+                      doc.setFont(undefined, "bold");
+                      doc.text(val, 160, y, { align: "right" });
+                      doc.setFont(undefined, "normal");
+                    });
+                    // Total range
+                    doc.setFillColor(26, 74, 122);
+                    doc.rect(15, 232, 180, 20, "F");
+                    doc.setTextColor(255, 255, 255);
+                    doc.setFontSize(11);
+                    doc.text("PRESUPUESTO ESTIMADO DEL PROYECTO:", 20, 243);
+                    doc.setFontSize(13);
+                    doc.text(`${fmt(result.rangeMin)}  —  ${fmt(result.rangeMax)}`, 160, 243, { align: "right" });
+                    // Disclaimer
+                    doc.setFontSize(7.5);
+                    doc.setTextColor(120, 120, 120);
+                    const disclaimer = "AVISO LEGAL: Este estimado es únicamente para propósitos presupuestarios y no constituye una propuesta formal ni contrato. El precio final está sujeto a revisión de planos, alcance del proyecto, condiciones del sitio, disponibilidad de mano de obra, precios de materiales y aprobación escrita por parte de Insta Buildings LLC.";
+                    const lines = doc.splitTextToSize(disclaimer, 170);
+                    doc.text(lines, 20, 262);
+                    // Signature line
+                    doc.setDrawColor(180, 180, 180);
+                    doc.line(20, 282, 90, 282);
+                    doc.line(120, 282, 190, 282);
+                    doc.setTextColor(150, 150, 150);
+                    doc.text("Firma del Cliente", 20, 287);
+                    doc.text("Insta Buildings LLC", 120, 287);
+                    doc.save(`estimado-${project.projectName || "insta-buildings"}.pdf`);
+                  }}>
                     📄 Exportar PDF
                   </button>
                   <button className="btn btn-ghost" onClick={() => alert(`Enviando a: ${project.email}`)}>
