@@ -657,9 +657,9 @@ function Landing({ onStart, onAdmin }) {
       <div className="landing-content">
         <nav className="nav">
           <div className="logo-area">
-            <div className="logo-icon">IB</div>
+            <img src="/logo.png" alt="Insta Buildings" style={{ height: "48px", objectFit: "contain" }} />
             <div>
-              <div className="logo-text">INSTA BUILDINGS</div>
+              <img src="/logo.png" alt="Insta Buildings" style={{ height: "48px", objectFit: "contain" }} />
               <div className="logo-sub">Metal Building Specialists</div>
             </div>
           </div>
@@ -790,9 +790,9 @@ const [quotePrice, setQuotePrice] = useState("");
     <div style={{ minHeight: "100vh" }}>
       <nav className="nav">
         <div className="logo-area">
-          <div className="logo-icon">IB</div>
+          <img src="/logo.png" alt="Insta Buildings" style={{ height: "48px", objectFit: "contain" }} />
           <div>
-            <div className="logo-text">INSTA BUILDINGS</div>
+            <img src="/logo.png" alt="Insta Buildings" style={{ height: "48px", objectFit: "contain" }} />
             <div className="logo-sub">Estimador de Costos</div>
           </div>
         </div>
@@ -1357,9 +1357,9 @@ function AdminPanel({ config, onUpdateConfig, estimates, onBack }) {
     <div>
       <nav className="nav">
         <div className="logo-area">
-          <div className="logo-icon">IB</div>
+          <img src="/logo.png" alt="Insta Buildings" style={{ height: "48px", objectFit: "contain" }} />
           <div>
-            <div className="logo-text">INSTA BUILDINGS</div>
+            <img src="/logo.png" alt="Insta Buildings" style={{ height: "48px", objectFit: "contain" }} />
             <div className="logo-sub">Panel Administrativo</div>
           </div>
         </div>
