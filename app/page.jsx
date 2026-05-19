@@ -658,10 +658,6 @@ function Landing({ onStart, onAdmin }) {
         <nav className="nav">
           <div className="logo-area">
             <img src="/logo.png" alt="Insta Buildings" style={{ height: "48px", objectFit: "contain" }} />
-            <div>
-              <img src="/logo.png" alt="Insta Buildings" style={{ height: "48px", objectFit: "contain" }} />
-              <div className="logo-sub">Metal Building Specialists</div>
-            </div>
           </div>
           <div className="nav-actions">
             <button className="btn btn-ghost btn-sm" onClick={onAdmin}>Panel Admin</button>
@@ -791,10 +787,6 @@ const [quotePrice, setQuotePrice] = useState("");
       <nav className="nav">
         <div className="logo-area">
           <img src="/logo.png" alt="Insta Buildings" style={{ height: "48px", objectFit: "contain" }} />
-          <div>
-            <img src="/logo.png" alt="Insta Buildings" style={{ height: "48px", objectFit: "contain" }} />
-            <div className="logo-sub">Estimador de Costos</div>
-          </div>
         </div>
         <div className="nav-actions">
           <button className="btn btn-ghost btn-sm" onClick={onBack}>← Inicio</button>
@@ -1358,10 +1350,6 @@ function AdminPanel({ config, onUpdateConfig, estimates, onBack }) {
       <nav className="nav">
         <div className="logo-area">
           <img src="/logo.png" alt="Insta Buildings" style={{ height: "48px", objectFit: "contain" }} />
-          <div>
-            <img src="/logo.png" alt="Insta Buildings" style={{ height: "48px", objectFit: "contain" }} />
-            <div className="logo-sub">Panel Administrativo</div>
-          </div>
         </div>
         <div className="nav-actions">
           <button className="btn btn-ghost btn-sm" onClick={onBack}>← Salir</button>
