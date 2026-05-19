@@ -1055,77 +1055,314 @@ function Estimator({ config, onSaveEstimate, onBack }) {
 
                 <div style={{ display: "flex", gap: "1rem", marginTop: "1.5rem", flexWrap: "wrap" }}>
                   <button className="btn btn-primary" onClick={handleSave}>💾 Guardar Estimado</button>
-                  <button className="btn btn-orange" onClick={async () => {
+<button className="btn btn-orange" onClick={async () => {
                     const { default: jsPDF } = await import("jspdf");
+                    const LOGO = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==";
                     const doc = new jsPDF({ orientation: "portrait", unit: "mm", format: "letter" });
-                    const pw = 215.9; const m = 15; const cw = pw - m * 2; let y = 0;
-                    doc.setFillColor(255,255,255); doc.rect(0,0,pw,38,"F");
-                    doc.setFontSize(7.5); doc.setTextColor(80,80,80);
-                    doc.text("49 Kings Lake Estates Blvd, Humble TX 77346  |  Ph. 832-560-9155  |  admin@instabuildings.com", pw-m, 10, {align:"right"});
-                    doc.setFontSize(16); doc.setFont(undefined,"bold"); doc.setTextColor(224,80,20);
-                    doc.text("Metal Building Erection", pw-m, 20, {align:"right"});
-                    doc.text("Contract", pw-m, 28, {align:"right"});
-                    doc.setFontSize(8); doc.setTextColor(60,60,60); doc.setFont(undefined,"normal");
-                    const qn = "BDS-"+Date.now().toString().slice(-6);
-                    doc.text("Quote No. "+qn, pw-m, 34, {align:"right"});
-                    doc.text("Date: "+new Date().toLocaleDateString("en-US"), m, 34);
-                    doc.setDrawColor(224,80,20); doc.setLineWidth(1.5); doc.line(m,38,pw-m,38);
-                    y = 46;
-                    doc.setFillColor(255,252,240); doc.setDrawColor(224,180,80); doc.setLineWidth(0.4);
-                    doc.roundedRect(m,y,cw,12,1,1,"FD");
-                    doc.setFontSize(8); doc.setTextColor(60,60,60);
-                    doc.text(doc.splitTextToSize("This quotation is valid for 30 calendar days from the date of issuance. After this period, Insta Buildings LLC. reserves the right to modify prices, availability, scheduling, and other terms without prior notice.",cw-6),m+3,y+5);
-                    y+=18;
-                    const sh=(t,yp)=>{doc.setFontSize(9);doc.setFont(undefined,"bold");doc.setTextColor(224,80,20);doc.text(t,m,yp);doc.setDrawColor(224,80,20);doc.setLineWidth(0.5);doc.line(m,yp+1.5,pw-m,yp+1.5);return yp+7;};
-                    y=sh("PROJECT INFORMATION",y);
-                    const fields=[["Customer",project.customerName||""],["Email",project.email||""],["Phone",project.phone||""],["Address",(project.city||"")+(project.state?", "+STATE_RATES[project.state]?.name:"")+" "+(project.zip||"")],["Project Name",project.projectName||""],["Project Type",project.projectType],["Total Area",project.sqft?Number(project.sqft).toLocaleString()+" SqFt":""],["Building Height",(project.height||"")+" ft"],["Start Date","___________"],["Est. Completion","___________"],["Quote No.",qn]];
+                    const pw = 215.9, ph = 279.4, m = 14, cw = pw - m * 2;
+                    let y = 0;
+
+                    const orange = [224, 80, 20];
+                    const dark = [30, 30, 30];
+                    const gray = [90, 90, 90];
+                    const lightGray = [245, 245, 245];
+
+                    const sectionHeader = (title, yPos) => {
+                      doc.setFontSize(9); doc.setFont(undefined, "bold");
+                      doc.setTextColor(...orange);
+                      doc.text(title, m, yPos);
+                      doc.setDrawColor(...orange); doc.setLineWidth(0.6);
+                      doc.line(m, yPos + 2, pw - m, yPos + 2);
+                      doc.setLineWidth(0.2); doc.setDrawColor(220, 220, 220);
+                      return yPos + 8;
+                    };
+
+                    const addClause = (title, text, yPos) => {
+                      if (yPos > 245) { doc.addPage(); yPos = 18; }
+                      doc.setFontSize(8.5); doc.setFont(undefined, "bold"); doc.setTextColor(...orange);
+                      doc.text(title, m, yPos);
+                      doc.setDrawColor(...orange); doc.setLineWidth(0.5);
+                      doc.line(m, yPos + 1.5, pw - m, yPos + 1.5);
+                      yPos += 5;
+                      doc.setFontSize(8); doc.setFont(undefined, "normal"); doc.setTextColor(...dark);
+                      const lines = doc.splitTextToSize(text, cw);
+                      doc.text(lines, m, yPos);
+                      return yPos + lines.length * 3.8 + 6;
+                    };
+
+                    // ── PAGE 1 HEADER ─────────────────────────────────────
+                    doc.setFillColor(20, 20, 20);
+                    doc.rect(0, 0, pw, 45, "F");
+                    doc.setFillColor(...orange);
+                    doc.rect(0, 42, pw, 3, "F");
+
+                    // Logo placeholder area
+                    doc.setFillColor(255, 255, 255);
+                    doc.roundedRect(m, 7, 55, 28, 2, 2, "F");
+                    doc.setFontSize(11); doc.setFont(undefined, "bold"); doc.setTextColor(...orange);
+                    doc.text("INSTA", m + 4, 18);
+                    doc.text("BUILDINGS", m + 4, 26);
+                    doc.setFontSize(6); doc.setFont(undefined, "normal"); doc.setTextColor(150, 150, 150);
+                    doc.text("E R E C T O R S", m + 4, 31);
+
+                    // Title right side
+                    doc.setFontSize(18); doc.setFont(undefined, "bold"); doc.setTextColor(255, 255, 255);
+                    doc.text("Metal Building Erection", pw - m, 16, { align: "right" });
+                    doc.text("Contract", pw - m, 26, { align: "right" });
+
+                    // Contact info bar
+                    doc.setFontSize(7); doc.setFont(undefined, "normal"); doc.setTextColor(180, 180, 180);
+                    doc.text("49 Kings Lake Estates Blvd, Humble TX 77346  |  Ph. 832-560-9155  |  admin@instabuildings.com", pw / 2, 36, { align: "center" });
+
+                    y = 52;
+
+                    // Quote info row
+                    const qn = "BDS-" + Date.now().toString().slice(-6);
+                    const qDate = new Date().toLocaleDateString("en-US");
+                    doc.setFillColor(248, 248, 248);
+                    doc.rect(m, y, cw, 10, "F");
+                    doc.setDrawColor(220, 220, 220); doc.setLineWidth(0.3);
+                    doc.rect(m, y, cw, 10, "D");
+                    doc.setFontSize(8.5); doc.setFont(undefined, "bold"); doc.setTextColor(...dark);
+                    doc.text("Date:", m + 3, y + 6.5);
+                    doc.setFont(undefined, "normal"); doc.setTextColor(...gray);
+                    doc.text(qDate, m + 16, y + 6.5);
+                    doc.setFont(undefined, "bold"); doc.setTextColor(...dark);
+                    doc.text("Quote No.:", pw - m - 50, y + 6.5);
+                    doc.setFont(undefined, "normal"); doc.setTextColor(...orange);
+                    doc.text(qn, pw - m - 3, y + 6.5, { align: "right" });
+                    y += 16;
+
+                    // Validity notice
+                    doc.setFillColor(255, 252, 235);
+                    doc.setDrawColor(224, 160, 50); doc.setLineWidth(0.4);
+                    doc.roundedRect(m, y, cw, 13, 1, 1, "FD");
+                    doc.setFillColor(...orange); doc.rect(m, y, 3, 13, "F");
+                    doc.setFontSize(7.5); doc.setFont(undefined, "normal"); doc.setTextColor(80, 60, 20);
+                    const validText = doc.splitTextToSize("This quotation is valid for 30 calendar days from the date of issuance. After this period, Insta Buildings LLC. reserves the right to modify prices, availability, scheduling, and other terms without prior notice.", cw - 10);
+                    doc.text(validText, m + 6, y + 5);
+                    y += 19;
+
+                    // ── PROJECT INFORMATION ───────────────────────────────
+                    y = sectionHeader("PROJECT INFORMATION", y);
+                    const fields = [
+                      ["Customer", project.customerName || ""],
+                      ["Contact Title", ""],
+                      ["Email", project.email || ""],
+                      ["Phone", project.phone || ""],
+                      ["Address", (project.city || "") + (project.state ? ", " + STATE_RATES[project.state]?.name : "") + " " + (project.zip || "")],
+                      ["Project Name", project.projectName || ""],
+                      ["Project Location", (project.city || "") + (project.state ? ", " + STATE_RATES[project.state]?.name : "")],
+                      ["Start Date", "___________"],
+                      ["Est. Completion", "___________"],
+                      ["Total Area", project.sqft ? Number(project.sqft).toLocaleString() + " SqFt" : ""],
+                      ["Quote No.", qn],
+                    ];
                     doc.setFontSize(8);
-                    fields.forEach(([l,v],i)=>{const ry=y+i*6.5;doc.setFillColor(i%2===0?250:255,i%2===0?250:255,i%2===0?250:255);doc.rect(m,ry-4,cw,6.5,"F");doc.setDrawColor(220,220,220);doc.setLineWidth(0.2);doc.rect(m,ry-4,cw,6.5,"D");doc.setFont(undefined,"bold");doc.setTextColor(40,40,40);doc.text(l,m+2,ry);doc.setFont(undefined,"normal");doc.setTextColor(80,80,80);doc.text(String(v),m+55,ry);});
-                    y+=fields.length*6.5+6;
-                    y=sh("SCOPE OF WORK",y);
-                    ["Structural Erection Labor","Welding Equipment & Supplies","Skytrack Machinery","Scissor Lift Equipment"].forEach((item,i)=>{doc.setFillColor(i%2===0?255:250,i%2===0?255:250,i%2===0?255:250);doc.rect(m,y-3.5,cw,5.5,"F");doc.setDrawColor(220,220,220);doc.setLineWidth(0.2);doc.rect(m,y-3.5,cw,5.5,"D");doc.setFont(undefined,"normal");doc.setTextColor(60,60,60);doc.text(item,m+2,y);y+=5.5;});
-                    y+=5;
-                    y=sh("PAYMENT SCHEDULE",y);
-                    const tot=result.finalTotal;
-                    doc.setFillColor(248,248,248);doc.rect(m,y-3,cw,5,"F");doc.setFontSize(7.5);doc.setFont(undefined,"bold");doc.setTextColor(120,120,120);
-                    doc.text("Installment",m+2,y);doc.text("Milestone",m+45,y);doc.text("%",m+148,y);doc.text("Amount (USD)",pw-m-2,y,{align:"right"});y+=4;
-                    [["Down Payment","Prior to mobilization","50%",tot*0.50],["Progress Payment","Per % completion (verified in writing)","40%",tot*0.40],["Final Payment","Upon substantial completion","10%",tot*0.10]].forEach(([inst,ms,pct,amt],i)=>{doc.setFillColor(i%2===0?255:250,i%2===0?255:250,i%2===0?255:250);doc.rect(m,y-3.5,cw,6,"F");doc.setDrawColor(220,220,220);doc.setLineWidth(0.2);doc.rect(m,y-3.5,cw,6,"D");doc.setFont(undefined,"bold");doc.setTextColor(40,40,40);doc.text(inst,m+2,y);doc.setFont(undefined,"normal");doc.setTextColor(80,80,80);doc.text(ms,m+45,y);doc.text(pct,m+148,y);doc.setFont(undefined,"bold");doc.text(fmt(amt),pw-m-2,y,{align:"right"});y+=6;});
-                    y+=3;
-                    doc.setFillColor(255,252,240);doc.setDrawColor(224,130,50);doc.setLineWidth(0.4);doc.rect(m,y,cw,14,"FD");doc.setFontSize(7.5);doc.setFont(undefined,"bold");doc.setTextColor(40,40,40);doc.text("NO RETAINAGE ALLOWED",m+2,y+5);doc.setFont(undefined,"normal");doc.text(" — No retention permitted unless agreed in writing by Insta Buildings LLC.",m+2,y+10,{maxWidth:cw-4});y+=18;
-                    doc.addPage();y=20;
-                    y=sh("SCOPE CLARIFICATION",y);
-                    const si2=[{id:"canopy",label:"Canopy"},{id:"parapets",label:"Parapets"},{id:"dumpsterDoors",label:"Dumpster Doors"},{id:"roofLadders",label:"Roof Ladders"},{id:"framedOpenings",label:"Framed Openings"},{id:"louvers",label:"Louvers"},{id:"walkDoors",label:"Walk Doors"},{id:"overheadDoorFrames",label:"Overhead Door Frames"},{id:"roofExtensions",label:"Roof Extensions"},{id:"mezzanineSupport",label:"Mezzanine Structure"},{id:"trimPackage",label:"Trim & Flashings"},{id:"insulationInstall",label:"Insulation"},{id:"metalDeckInstall",label:"Metal Deck Installation"},{id:"joistInstall",label:"Joist Installation"},{label:"Wall Panels"},{label:"Roof Panels"},{label:"Anchor Bolts"},{label:"Field Welding"},{label:"Crane Service"},{label:"Concrete Work"},{label:"Engineering / Sealed Drawings"},{label:"Permit Processing"}];
-                    doc.setFillColor(248,248,248);doc.rect(m,y-3,cw,5,"F");doc.setFont(undefined,"bold");doc.setTextColor(120,120,120);doc.text("Item",m+2,y);doc.text("Status",m+90,y);doc.text("Qty / Description",m+130,y);y+=4;
-                    si2.forEach((item,i)=>{const inc=item.id?additionals[item.id]?.enabled:false;doc.setFillColor(i%2===0?255:250,i%2===0?255:250,i%2===0?255:250);doc.rect(m,y-3.5,cw,5.5,"F");doc.setDrawColor(220,220,220);doc.setLineWidth(0.2);doc.rect(m,y-3.5,cw,5.5,"D");doc.setFont(undefined,"normal");doc.setTextColor(60,60,60);doc.text(item.label,m+2,y);if(inc){doc.setTextColor(30,140,80);doc.setFont(undefined,"bold");doc.text("Included",m+90,y);doc.setFont(undefined,"normal");doc.setTextColor(80,80,80);doc.text(String(additionals[item.id]?.qty||""),m+130,y);}else{doc.setTextColor(200,60,40);doc.setFont(undefined,"bold");doc.text("Excluded",m+90,y);doc.setFont(undefined,"normal");}doc.setTextColor(60,60,60);y+=5.5;});
-                    y+=6;
-                    doc.addPage();y=20;
-                    const cl=(t,txt,yp)=>{if(yp>240){doc.addPage();yp=20;}doc.setFontSize(8.5);doc.setFont(undefined,"bold");doc.setTextColor(224,80,20);doc.text(t,m,yp);doc.setDrawColor(224,80,20);doc.setLineWidth(0.4);doc.line(m,yp+1.5,pw-m,yp+1.5);yp+=5;doc.setFontSize(7.5);doc.setFont(undefined,"normal");doc.setTextColor(50,50,50);const ls=doc.splitTextToSize(txt,cw);doc.text(ls,m,yp);return yp+ls.length*3.5+5;};
-                    y=cl("LIMITATION OF LIABILITY","THE TOTAL LIABILITY OF INSTA BUILDINGS LLC. SHALL NOT EXCEED THE TOTAL CONTRACT PRICE. Under no circumstances shall Insta Buildings LLC. be liable for indirect, incidental, special, consequential, or punitive damages, including loss of profits, revenue, business interruption, or loss of use.",y);
-                    y=cl("CLIENT RESPONSIBILITIES","Client shall provide approved construction drawings prior to mobilization. Client is responsible for: accuracy of drawings; correct anchor bolt placement; site accessibility; coordination with other contractors; and compliance with engineering and permits. Client shall provide electrical power within 50 feet of the slab, safe site access, and 25 feet of clear space around the slab perimeter.",y);
-                    y=cl("FORMAL ACCEPTANCE","Upon substantial completion, Client has five (5) business days to issue written acceptance or submit a deficiency list. Failure to respond constitutes full acceptance. Title, risk, and responsibility transfer to Client upon acceptance.",y);
-                    y=cl("CHANGE ORDERS","Any modification must be documented in a written Change Order signed by both parties prior to commencing additional work. Verbal instructions are not authorization. Insta Buildings LLC. may suspend modified work until a signed Change Order is received.",y);
-                    y=cl("WARRANTY","Insta Buildings LLC. warrants installation workmanship for twelve (12) months from written acceptance. Warranty excludes: engineering defects; defective third-party materials; weather damage; structural movement; foundation failures; and post-installation modifications.",y);
-                    y=cl("MOBILIZATION & DOWN TIME","One (1) mobilization is included. Additional mobilizations: minimum $2,000 USD/day. Unscheduled downtime caused by site restrictions, unsafe conditions, delays, lack of materials, weather, or Client interference shall be charged to Client.",y);
-                    y=cl("FORCE MAJEURE","Insta Buildings LLC. is not liable for delays from natural disasters, hurricanes, storms, floods, fires, governmental acts, war, terrorism, labor shortages, material shortages, pandemics, or any cause beyond its reasonable control.",y);
-                    y=cl("GOVERNING LAW","This Contract is governed by the laws of the State of Texas. Disputes shall be resolved by binding arbitration in Harris County, Texas under AAA rules. The prevailing party is entitled to recover attorneys fees and arbitration expenses.",y);
-                    if(y>210){doc.addPage();y=20;}
-                    y+=5;y=sh("QUOTE ACCEPTANCE",y);
-                    doc.setFontSize(7.5);doc.setFont(undefined,"normal");doc.setTextColor(60,60,60);
-                    doc.text(doc.splitTextToSize("Once accepted in writing — by signature, email, advance payment, or any express manifestation — this quotation constitutes a legally binding contract. Commencement of work constitutes full acceptance of all terms.",cw),m,y);
-                    y+=16;
-                    doc.setDrawColor(180,180,180);doc.setLineWidth(0.3);doc.rect(m,y,85,45,"D");doc.rect(m+100,y,85,45,"D");
-                    doc.setFillColor(245,245,245);doc.rect(m,y,85,8,"F");doc.rect(m+100,y,85,8,"F");
-                    doc.setFontSize(8);doc.setFont(undefined,"bold");doc.setTextColor(40,40,40);
-                    doc.text("Seller — Insta Buildings LLC.",m+2,y+5.5);doc.text("Buyer / Client",m+102,y+5.5);
-                    doc.setFont(undefined,"normal");doc.setTextColor(80,80,80);doc.setFontSize(7.5);
-                    doc.text("Manuel Angel Guajardo",m+2,y+15);doc.text(project.customerName||"_____________________________",m+102,y+15);
-                    doc.setDrawColor(100,100,100);doc.line(m+2,y+35,m+80,y+35);doc.line(m+102,y+35,m+180,y+35);
-                    doc.setFontSize(7);doc.setTextColor(120,120,120);
-                    doc.text("Signature                    Date: ____________",m+2,y+39);
-                    doc.text("Signature                    Date: ____________",m+102,y+39);
-                    const pc=doc.getNumberOfPages();
-                    for(let p=1;p<=pc;p++){doc.setPage(p);doc.setFillColor(245,245,245);doc.rect(0,273.4,pw,6,"F");doc.setDrawColor(224,80,20);doc.setLineWidth(0.5);doc.line(0,273.4,pw,273.4);doc.setFontSize(7);doc.setTextColor(120,120,120);doc.setFont(undefined,"normal");doc.text("49 Kings Lake Estates Blvd, Humble TX 77346  |  832-560-9155  |  admin@instabuildings.com",m,277.5);doc.text("Page "+p+" of "+pc,pw-m,277.5,{align:"right"});}
-                    doc.save("InstaBuildings-Contract-"+(project.projectName||"estimate").replace(/\s+/g,"-")+"-"+new Date().toISOString().slice(0,10)+".pdf");
+                    fields.forEach(([label, val], i) => {
+                      const ry = y + i * 7;
+                      doc.setFillColor(i % 2 === 0 ? 252 : 255, i % 2 === 0 ? 252 : 255, i % 2 === 0 ? 252 : 255);
+                      doc.rect(m, ry - 4.5, cw, 7, "F");
+                      doc.setDrawColor(225, 225, 225); doc.setLineWidth(0.2);
+                      doc.rect(m, ry - 4.5, cw, 7, "D");
+                      doc.setFillColor(...orange); doc.rect(m, ry - 4.5, 1.5, 7, "F");
+                      doc.setFont(undefined, "bold"); doc.setTextColor(...dark);
+                      doc.text(label, m + 4, ry);
+                      doc.setFont(undefined, "normal"); doc.setTextColor(...gray);
+                      doc.text(String(val), m + 60, ry);
+                    });
+                    y += fields.length * 7 + 8;
+
+                    // ── SCOPE OF WORK ─────────────────────────────────────
+                    y = sectionHeader("SCOPE OF WORK", y);
+                    doc.setFillColor(248, 248, 248);
+                    doc.rect(m, y - 4, cw, 6, "F");
+                    doc.setFont(undefined, "bold"); doc.setFontSize(7.5); doc.setTextColor(120, 120, 120);
+                    doc.text("Description of Work", m + 3, y);
+                    y += 4;
+                    ["Structural Erection Labor", "Welding Equipment & Supplies", "Skytrack Machinery", "Scissor Lift Equipment"].forEach((item, i) => {
+                      doc.setFillColor(i % 2 === 0 ? 255 : 250, i % 2 === 0 ? 255 : 250, i % 2 === 0 ? 255 : 250);
+                      doc.rect(m, y - 3.5, cw, 6, "F");
+                      doc.setDrawColor(230, 230, 230); doc.setLineWidth(0.2);
+                      doc.rect(m, y - 3.5, cw, 6, "D");
+                      doc.setFont(undefined, "normal"); doc.setFontSize(8); doc.setTextColor(...gray);
+                      doc.text(item, m + 3, y);
+                      y += 6;
+                    });
+                    y += 6;
+
+                    // ── PAYMENT SCHEDULE ──────────────────────────────────
+                    y = sectionHeader("PAYMENT SCHEDULE", y);
+                    const tot = result.finalTotal;
+                    // Header
+                    doc.setFillColor(40, 40, 40);
+                    doc.rect(m, y - 4, cw, 7, "F");
+                    doc.setFont(undefined, "bold"); doc.setFontSize(7.5); doc.setTextColor(255, 255, 255);
+                    doc.text("Installment", m + 3, y);
+                    doc.text("Milestone", m + 52, y);
+                    doc.text("%", m + 148, y, { align: "center" });
+                    doc.text("Amount (USD)", pw - m - 3, y, { align: "right" });
+                    y += 5;
+                    [
+                      ["Down Payment", "Prior to mobilization", "50%", tot * 0.50],
+                      ["Progress Payment", "Per % of structural completion (verified in writing)", "40%", tot * 0.40],
+                      ["Final Payment", "Upon substantial completion", "10%", tot * 0.10],
+                    ].forEach(([inst, ms, pct, amt], i) => {
+                      doc.setFillColor(i % 2 === 0 ? 255 : 248, i % 2 === 0 ? 255 : 248, i % 2 === 0 ? 255 : 248);
+                      doc.rect(m, y - 3.5, cw, 7, "F");
+                      doc.setDrawColor(225, 225, 225); doc.setLineWidth(0.2);
+                      doc.rect(m, y - 3.5, cw, 7, "D");
+                      doc.setFont(undefined, "bold"); doc.setFontSize(8); doc.setTextColor(...dark);
+                      doc.text(inst, m + 3, y);
+                      doc.setFont(undefined, "normal"); doc.setTextColor(...gray);
+                      doc.text(ms, m + 52, y, { maxWidth: 90 });
+                      doc.text(pct, m + 148, y, { align: "center" });
+                      doc.setFont(undefined, "bold"); doc.setTextColor(...orange);
+                      doc.text(fmt(amt), pw - m - 3, y, { align: "right" });
+                      y += 7;
+                    });
+                    y += 4;
+
+                    // NO RETAINAGE
+                    doc.setFillColor(255, 248, 240);
+                    doc.setDrawColor(...orange); doc.setLineWidth(0.4);
+                    doc.roundedRect(m, y, cw, 16, 1, 1, "FD");
+                    doc.setFillColor(...orange); doc.rect(m, y, 3, 16, "F");
+                    doc.setFontSize(7.5); doc.setFont(undefined, "bold"); doc.setTextColor(...dark);
+                    doc.text("NO RETAINAGE ALLOWED", m + 6, y + 5.5);
+                    doc.setFont(undefined, "normal");
+                    doc.text(" — No retention (\"retainage\") is permitted unless expressly agreed in writing by Insta Buildings LLC.", m + 6, y + 5.5, { maxWidth: cw - 10 });
+                    doc.setFont(undefined, "bold");
+                    doc.text("Right to Suspend:", m + 6, y + 11);
+                    doc.setFont(undefined, "normal");
+                    doc.text(" Failure to make any payment entitles Insta Buildings LLC. to immediately suspend all work without penalty.", m + 6, y + 11, { maxWidth: cw - 10 });
+                    y += 22;
+
+                    // ── PAGE 2: SCOPE CLARIFICATION ───────────────────────
+                    doc.addPage(); y = 18;
+                    y = sectionHeader("SCOPE CLARIFICATION", y);
+                    doc.setFillColor(255, 248, 240);
+                    doc.setDrawColor(...orange); doc.setLineWidth(0.3);
+                    doc.roundedRect(m, y, cw, 11, 1, 1, "FD");
+                    doc.setFontSize(7.5); doc.setFont(undefined, "normal"); doc.setTextColor(80, 60, 20);
+                    doc.text(doc.splitTextToSize("Any item not expressly marked as Included is excluded from this contract and may be quoted separately via Change Order.", cw - 6), m + 3, y + 4.5);
+                    y += 16;
+
+                    // Table header
+                    doc.setFillColor(40, 40, 40);
+                    doc.rect(m, y - 4, cw, 7, "F");
+                    doc.setFont(undefined, "bold"); doc.setFontSize(7.5); doc.setTextColor(255, 255, 255);
+                    doc.text("Item", m + 3, y);
+                    doc.text("Status", m + 110, y);
+                    doc.text("Qty / Description", m + 148, y);
+                    y += 5;
+
+                    const scopeItems = [
+                      { id: "canopy", label: "Canopy" },
+                      { id: "parapets", label: "Parapets" },
+                      { id: "dumpsterDoors", label: "Dumpster Doors" },
+                      { id: "roofLadders", label: "Roof Ladders" },
+                      { id: "framedOpenings", label: "Framed Openings" },
+                      { id: "louvers", label: "Louvers" },
+                      { id: "walkDoors", label: "Walk Doors" },
+                      { id: "overheadDoorFrames", label: "Overhead Door Frames" },
+                      { id: "roofExtensions", label: "Roof Extensions" },
+                      { id: "mezzanineSupport", label: "Mezzanine Structure" },
+                      { id: "trimPackage", label: "Trim & Flashings" },
+                      { id: "insulationInstall", label: "Insulation" },
+                      { id: "metalDeckInstall", label: "Metal Deck Installation" },
+                      { id: "joistInstall", label: "Joist Installation" },
+                      { label: "Wall Panels" }, { label: "Roof Panels" },
+                      { label: "Anchor Bolts" }, { label: "Field Welding" },
+                      { label: "Crane Service" }, { label: "Concrete Work" },
+                      { label: "Engineering / Sealed Drawings" }, { label: "Permit Processing" },
+                    ];
+                    scopeItems.forEach((item, i) => {
+                      const inc = item.id ? additionals[item.id]?.enabled : false;
+                      doc.setFillColor(i % 2 === 0 ? 255 : 250, i % 2 === 0 ? 255 : 250, i % 2 === 0 ? 255 : 250);
+                      doc.rect(m, y - 3.5, cw, 6, "F");
+                      doc.setDrawColor(230, 230, 230); doc.setLineWidth(0.2);
+                      doc.rect(m, y - 3.5, cw, 6, "D");
+                      doc.setFont(undefined, "normal"); doc.setFontSize(8); doc.setTextColor(...gray);
+                      doc.text(item.label, m + 3, y);
+                      if (inc) {
+                        doc.setFillColor(220, 245, 220); doc.roundedRect(m + 105, y - 3, 28, 5, 1, 1, "F");
+                        doc.setFont(undefined, "bold"); doc.setTextColor(30, 130, 60);
+                        doc.text("Included", m + 110, y);
+                        doc.setFont(undefined, "normal"); doc.setTextColor(...gray);
+                        doc.text(String(additionals[item.id]?.qty || ""), m + 148, y);
+                      } else {
+                        doc.setFillColor(250, 225, 220); doc.roundedRect(m + 105, y - 3, 28, 5, 1, 1, "F");
+                        doc.setFont(undefined, "bold"); doc.setTextColor(180, 50, 30);
+                        doc.text("Excluded", m + 110, y);
+                        doc.setFont(undefined, "normal");
+                      }
+                      y += 6;
+                    });
+
+                    // ── PAGE 3: LEGAL CLAUSES ─────────────────────────────
+                    doc.addPage(); y = 18;
+                    y = addClause("LIMITATION OF LIABILITY", "THE TOTAL LIABILITY OF INSTA BUILDINGS LLC. SHALL NOT EXCEED THE TOTAL CONTRACT PRICE PAID UNDER THIS AGREEMENT. Under no circumstances shall Insta Buildings LLC. be liable for indirect, incidental, special, consequential, punitive, or economic damages, including but not limited to: loss of profits, loss of revenue, business interruption, delays, or loss of use.", y);
+                    y = addClause("CLIENT RESPONSIBILITIES & PLAN APPROVAL", "Client shall provide approved, stamped, and finalized construction drawings prior to mobilization. Client is solely responsible for: accuracy and approval of all drawings; correct placement of all anchor bolts per approved drawings; site accessibility and preparation; coordination with other contractors; compliance with engineering requirements and permits. Client shall provide: (a) functional electrical power within 50 feet of the slab; (b) safe and stable site access; (c) a minimum of 25 feet of clear space around the slab perimeter.", y);
+                    y = addClause("FORMAL ACCEPTANCE OF WORK", "Upon substantial completion, Client shall have five (5) business days to: (1) issue written acceptance, or (2) submit a written list of specific deficiencies. Failure to respond within said period shall constitute full acceptance. Upon acceptance, title, risk, and responsibility for the structure transfer entirely to Client.", y);
+                    y = addClause("CHANGE ORDERS", "Any modification to the scope of work must be documented in a written Change Order signed by both parties prior to commencing additional work. Verbal instructions shall not constitute authorization. Insta Buildings LLC. reserves the right to suspend modified work until a signed Change Order is received.", y);
+                    y = addClause("WARRANTY", "Insta Buildings LLC. warrants installation workmanship for twelve (12) months from the date of written acceptance. This warranty expressly excludes: design or engineering defects; defective materials supplied by third parties; weather damage; damage caused by third parties; structural movement or foundation failures; and modifications made after installation.", y);
+                    y = addClause("MOBILIZATION & DOWN TIME", "A maximum of one (1) mobilization is included. Additional mobilizations: minimum $2,000 USD per day. Any unscheduled downtime caused by site restrictions, unsafe conditions, delays by other contractors, lack of materials, lack of access, weather, Client interference, or any condition beyond Insta Buildings LLC.'s control shall be charged to Client.", y);
+                    y = addClause("FORCE MAJEURE", "Insta Buildings LLC. shall not be liable for delays, suspensions, or damages arising from: natural disasters, hurricanes, storms, floods, fires, adverse weather, governmental acts, war, terrorism, civil unrest, strikes, labor shortages, supplier delays, material shortages, transportation failures, accidents, pandemics, or any cause beyond its reasonable control.", y);
+                    y = addClause("GOVERNING LAW & DISPUTE RESOLUTION", "This Contract shall be governed by the laws of the State of Texas. Any dispute shall be resolved by binding arbitration in Harris County, Texas, under the rules of the American Arbitration Association. The prevailing party shall be entitled to recover reasonable attorneys' fees, legal costs, and arbitration expenses.", y);
+
+                    // ── SIGNATURE PAGE ────────────────────────────────────
+                    if (y > 210) { doc.addPage(); y = 18; }
+                    y += 6;
+                    y = sectionHeader("QUOTE ACCEPTANCE", y);
+                    doc.setFontSize(8); doc.setFont(undefined, "normal"); doc.setTextColor(...gray);
+                    doc.text(doc.splitTextToSize("Once accepted in writing by Client — whether by signature, email, advance payment, purchase order, or any express manifestation of acceptance — this quotation shall constitute a legally binding contract between the parties.", cw), m, y);
+                    y += 18;
+
+                    // Signature boxes
+                    doc.setFillColor(248, 248, 248);
+                    doc.setDrawColor(200, 200, 200); doc.setLineWidth(0.4);
+                    doc.roundedRect(m, y, 85, 48, 2, 2, "FD");
+                    doc.roundedRect(m + 98, y, 85, 48, 2, 2, "FD");
+
+                    // Box headers
+                    doc.setFillColor(...orange);
+                    doc.roundedRect(m, y, 85, 9, 2, 2, "F");
+                    doc.rect(m, y + 5, 85, 4, "F");
+                    doc.roundedRect(m + 98, y, 85, 9, 2, 2, "F");
+                    doc.rect(m + 98, y + 5, 85, 4, "F");
+
+                    doc.setFontSize(7.5); doc.setFont(undefined, "bold"); doc.setTextColor(255, 255, 255);
+                    doc.text("Seller / Contractor — Insta Buildings LLC.", m + 3, y + 6);
+                    doc.text("Buyer / Client", m + 101, y + 6);
+
+                    doc.setFontSize(8); doc.setFont(undefined, "normal"); doc.setTextColor(...dark);
+                    doc.text("Insta Buildings LLC.", m + 3, y + 18);
+                    doc.text("Manuel Angel Guajardo", m + 3, y + 25);
+                    doc.text(project.customerName || "_____________________________", m + 101, y + 18);
+
+                    doc.setDrawColor(150, 150, 150); doc.setLineWidth(0.4);
+                    doc.line(m + 3, y + 38, m + 82, y + 38);
+                    doc.line(m + 101, y + 38, m + 180, y + 38);
+                    doc.setFontSize(7); doc.setTextColor(150, 150, 150);
+                    doc.text("Signature                              Date: ____________", m + 3, y + 43);
+                    doc.text("Signature                              Date: ____________", m + 101, y + 43);
+
+                    // ── FOOTER ALL PAGES ──────────────────────────────────
+                    const totalPages = doc.getNumberOfPages();
+                    for (let p = 1; p <= totalPages; p++) {
+                      doc.setPage(p);
+                      doc.setFillColor(25, 25, 25);
+                      doc.rect(0, ph - 11, pw, 11, "F");
+                      doc.setFillColor(...orange);
+                      doc.rect(0, ph - 11, pw, 1.5, "F");
+                      doc.setFontSize(7); doc.setFont(undefined, "normal"); doc.setTextColor(180, 180, 180);
+                      doc.text("49 Kings Lake Estates Blvd, Humble TX 77346  |  832-560-9155  |  admin@instabuildings.com", m, ph - 4);
+                      doc.setTextColor(...orange);
+                      doc.text("Page " + p + " of " + totalPages, pw - m, ph - 4, { align: "right" });
+                    }
+
+                    doc.save("InstaBuildings-Contract-" + (project.projectName || "estimate").replace(/\s+/g, "-") + "-" + new Date().toISOString().slice(0, 10) + ".pdf");
                   }}>
                     📄 Export Contract PDF
                   </button>
