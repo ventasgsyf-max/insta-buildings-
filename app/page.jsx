@@ -713,7 +713,7 @@ function Landing({ onStart, onAdmin }) {
 function Estimator({ config, onSaveEstimate, onBack }) {
   const [step, setStep] = useState(1);
   const [saved, setSaved] = useState(false);
-
+const [quotePrice, setQuotePrice] = useState("");
   const [project, setProject] = useState({
     projectName: "", customerName: "", email: "", phone: "",
     state: "", city: "", zip: "",
@@ -1048,7 +1048,26 @@ function Estimator({ config, onSaveEstimate, onBack }) {
                     Rango preliminar de presupuesto
                   </div>
                 </div>
-
+                <div style={{ margin: "1.5rem 0", padding: "1.2rem 1.5rem", background: "rgba(61,127,193,0.08)", border: "1px solid var(--blue3)", borderRadius: "8px" }}>
+  <div style={{ fontSize: "0.72rem", fontWeight: 600, letterSpacing: "2px", textTransform: "uppercase", color: "var(--text3)", marginBottom: "0.75rem" }}>
+    💲 Precio Final de Cotización
+  </div>
+  <div style={{ display: "flex", gap: "0.75rem", alignItems: "center" }}>
+    <input
+      type="number"
+      placeholder={`Ej. ${Math.round(result.finalTotal).toLocaleString()}`}
+      value={quotePrice}
+      onChange={e => setQuotePrice(e.target.value)}
+      style={{ fontSize: "1.2rem", fontWeight: 700, flex: 1 }}
+    />
+    <div style={{ fontSize: "0.78rem", color: "var(--text3)", whiteSpace: "nowrap" }}>USD</div>
+  </div>
+  {quotePrice && (
+    <div style={{ fontSize: "0.75rem", color: "var(--green)", marginTop: "0.5rem" }}>
+      ✓ El contrato se generará por {fmt(parseFloat(quotePrice))}
+    </div>
+  )}
+</div>
                 <div style={{ fontSize: "0.72rem", color: "var(--text3)", lineHeight: 1.7, fontStyle: "italic", padding: "1rem", background: "var(--surface2)", borderRadius: "6px", border: "1px solid var(--border)" }}>
                   <strong style={{ color: "var(--text2)", fontStyle: "normal" }}>AVISO LEGAL:</strong> Este estimado es únicamente para propósitos presupuestarios y no constituye una propuesta formal ni contrato. El precio final está sujeto a revisión de planos, alcance del proyecto, condiciones del sitio, disponibilidad de mano de obra, precios de materiales y aprobación escrita por parte de Insta Buildings LLC.
                 </div>
